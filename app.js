@@ -3,6 +3,7 @@
    ========================================================================== */
 
 // State Management
+let currentUser = '';
 let apiKey = '';
 let activePresetId = 'general';
 let conversationHistory = [];
@@ -69,22 +70,22 @@ const PRESETS = {
     }
 };
 
-// Mock Responses for Demo Mode
+// Mock Responses for Demo Mode (activated if key is 'demo')
 const MOCK_RESPONSES = {
     general: [
-        "Itu pertanyaan menarik! Dalam **Demo Mode** ini, saya hanya menyimulasikan respons. Silakan masukkan **API Key Gemini** Anda di sidebar kiri atau pada overlay gate untuk terhubung langsung dengan AI asli.",
-        "Halo! Saya berjalan dalam Demo Mode saat ini. Anda dapat mencoba menulis pesan lain, atau memasukkan API Key Gemini agar saya bisa memberikan jawaban asli menggunakan model Gemini terbaru.",
-        "Terima kasih atas pesan Anda. Sebagai asisten simulasi, saya merekomendasikan Anda untuk memasukkan API Key Anda agar kita bisa mendiskusikan topik ini secara mendalam dengan kemampuan AI Gemini yang sesungguhnya."
+        "Itu pertanyaan menarik! Dalam **Demo Mode** ini, saya hanya menyimulasikan respons. Silakan masukkan **API Key Gemini** Anda yang asli di sidebar kiri untuk terhubung langsung dengan AI asli.",
+        "Halo! Saya berjalan dalam Demo Mode saat ini karena Anda memasukkan kunci 'demo'. Anda dapat memasukkan API Key Gemini asli agar saya bisa memberikan jawaban asli menggunakan model Gemini terbaru.",
+        "Terima kasih atas pesan Anda. Sebagai asisten simulasi, saya merekomendasikan Anda untuk memasukkan API Key asli Anda agar kita bisa mendiskusikan topik ini secara mendalam dengan kemampuan AI Gemini yang sesungguhnya."
     ],
     coding: [
         "```javascript\n// Ini adalah contoh kode simulasi di Demo Mode\nfunction haloDunia() {\n    console.log(\"Halo Dunia! Silakan masukkan API Key Gemini Anda.\");\n}\nhaloDunia();\n```",
-        "Untuk menulis kode riil dan menyelesaikan problem pemrograman Anda, silakan hubungkan aplikasi ini dengan API Key Gemini Anda di sidebar sebelah kiri atau overlay gate.",
+        "Untuk menulis kode riil dan menyelesaikan problem pemrograman Anda, silakan hubungkan aplikasi ini dengan API Key Gemini Anda yang asli di sidebar sebelah kiri.",
         "```html\n<!-- Masukkan API Key di sidebar untuk mengaktifkan AI coding -->\n<div class=\"api-key-needed\">\n    <p>Hubungkan API Key untuk memulai coding dengan Gemini!</p>\n</div>\n```"
     ],
     writer: [
         "Teks simulasi: Dalam Demo Mode, saya hanya bisa memberikan contoh tulisan ini. Masukkan API Key Gemini Anda di panel pengaturan untuk mengaktifkan kemampuan menulis kreatif dan menerjemahkan bahasa secara akurat.",
-        "*\"Pagi hari yang cerah membawa inspirasi baru...\"*\n\nItu adalah cuplikan puisi singkat. Masukkan API Key Anda di sidebar untuk membuat teks/puisi yang lengkap!",
-        "Silakan masukkan API Key Anda di panel kiri untuk menggunakan fitur penerjemah bahasa secara real-time dari model Gemini 2.5."
+        "*\"Pagi hari yang cerah membawa inspirasi baru...\"*\n\nItu adalah cuplikan puisi singkat. Masukkan API Key asli Anda di sidebar untuk membuat teks/puisi yang lengkap!",
+        "Silakan masukkan API Key asli Anda di panel kiri untuk menggunakan fitur penerjemah bahasa secara real-time dari model Gemini 2.5."
     ],
     analyst: [
         "Analisis data membutuhkan model Gemini asli. Silakan masukkan API Key Anda di panel kiri.\n\nBerikut kerangka analisis standar:\n1. Pengumpulan Data\n2. Pembersihan Data\n3. Analisis Deskriptif\n4. Kesimpulan dan Rekomendasi",
@@ -132,25 +133,6 @@ window.addEventListener('DOMContentLoaded', () => {
     renderPresets();
     selectPreset('general');
 
-    // Load saved API Key
-    const savedKey = localStorage.getItem('gemini_api_key');
-    if (savedKey) {
-        apiKey = savedKey;
-        if (apiKeyGate) {
-            apiKeyGate.style.display = 'none';
-            apiKeyGate.setAttribute('aria-hidden', 'true');
-        }
-        if (apiKeyInput) apiKeyInput.value = savedKey;
-        if (apiKeyGateInput) apiKeyGateInput.value = savedKey;
-        updateStatusUI(true);
-    } else {
-        if (apiKeyGate) {
-            apiKeyGate.style.display = 'flex';
-            apiKeyGate.setAttribute('aria-hidden', 'false');
-        }
-        updateStatusUI(false);
-    }
-
     // Load Saved Theme
     const savedTheme = localStorage.getItem('theme');
     const themeIcon = themeToggleBtn?.querySelector('.theme-icon');
@@ -161,13 +143,158 @@ window.addEventListener('DOMContentLoaded', () => {
         if (themeText) themeText.textContent = 'Mode Terang';
     }
 
+    // Session validation
+    const sessionUser = sessionStorage.getItem('current_user');
+    if (sessionUser) {
+        loginSession(sessionUser);
+    } else {
+        logoutSession();
+    }
+
     // Setup All Event Listeners
     setupEventListeners();
-    toggleWelcomeScreen();
 });
+
+// Helper for users storage
+function getUsers() {
+    return JSON.parse(localStorage.getItem('users') || '{}');
+}
+
+function saveUsers(users) {
+    localStorage.setItem('users', JSON.stringify(users));
+}
+
+// Login Session Trigger
+function loginSession(username) {
+    currentUser = username;
+    sessionStorage.setItem('current_user', username);
+
+    // Hide Auth Gate and Show App Container
+    const authGate = document.getElementById('auth-gate');
+    if (authGate) authGate.style.display = 'none';
+
+    const appContainer = document.querySelector('.app-container');
+    if (appContainer) appContainer.style.display = 'flex';
+
+    // Load API Key for this specific logged-in user
+    const userKey = localStorage.getItem('api_key_' + username);
+    if (userKey) {
+        apiKey = userKey;
+        if (apiKeyGate) {
+            apiKeyGate.style.display = 'none';
+            apiKeyGate.setAttribute('aria-hidden', 'true');
+        }
+        if (apiKeyInput) apiKeyInput.value = userKey;
+        if (apiKeyGateInput) apiKeyGateInput.value = userKey;
+        updateStatusUI(true);
+    } else {
+        apiKey = '';
+        if (apiKeyInput) apiKeyInput.value = '';
+        if (apiKeyGateInput) apiKeyGateInput.value = '';
+        if (apiKeyGate) {
+            apiKeyGate.style.display = 'flex';
+            apiKeyGate.setAttribute('aria-hidden', 'false');
+        }
+        updateStatusUI(false);
+    }
+
+    toggleWelcomeScreen();
+    showToast('Info', `Masuk sebagai ${username}`, 'info');
+}
+
+// Logout Session Trigger
+function logoutSession() {
+    currentUser = '';
+    apiKey = '';
+    sessionStorage.removeItem('current_user');
+
+    // Hide App Container and Show Auth Gate
+    const appContainer = document.querySelector('.app-container');
+    if (appContainer) appContainer.style.display = 'none';
+
+    const authGate = document.getElementById('auth-gate');
+    if (authGate) authGate.style.display = 'flex';
+
+    // Reset Inputs
+    document.getElementById('login-username').value = '';
+    document.getElementById('login-password').value = '';
+    document.getElementById('register-username').value = '';
+    document.getElementById('register-password').value = '';
+
+    // Clear chat window silently
+    handleClearChatSilently();
+}
 
 // Setup Event Listeners
 function setupEventListeners() {
+    // Auth Gate Tab Switches
+    const tabLoginBtn = document.getElementById('tab-login-btn');
+    const tabRegisterBtn = document.getElementById('tab-register-btn');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+
+    tabLoginBtn?.addEventListener('click', () => {
+        tabLoginBtn.classList.add('active');
+        tabRegisterBtn.classList.remove('active');
+        loginForm.style.display = 'flex';
+        registerForm.style.display = 'none';
+    });
+
+    tabRegisterBtn?.addEventListener('click', () => {
+        tabRegisterBtn.classList.add('active');
+        tabLoginBtn.classList.remove('active');
+        registerForm.style.display = 'flex';
+        loginForm.style.display = 'none';
+    });
+
+    // Auth Forms Submission
+    loginForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+
+        if (!username || !password) {
+            showToast('Error', 'Semua kolom wajib diisi!', 'error');
+            return;
+        }
+
+        const users = getUsers();
+        if (users[username] && users[username] === password) {
+            loginSession(username);
+        } else {
+            showToast('Error', 'Username atau password salah!', 'error');
+        }
+    });
+
+    registerForm?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('register-username').value.trim();
+        const password = document.getElementById('register-password').value;
+
+        if (!username || !password) {
+            showToast('Error', 'Semua kolom wajib diisi!', 'error');
+            return;
+        }
+
+        const users = getUsers();
+        if (users[username]) {
+            showToast('Error', 'Username sudah terdaftar!', 'error');
+            return;
+        }
+
+        users[username] = password;
+        saveUsers(users);
+        showToast('Sukses', 'Pendaftaran berhasil!', 'success');
+        loginSession(username);
+    });
+
+    // Logout Click
+    const logoutBtn = document.getElementById('logout-btn');
+    logoutBtn?.addEventListener('click', () => {
+        logoutSession();
+        showToast('Sukses', 'Anda telah keluar akun.', 'success');
+    });
+
     // API Key Gate Submit
     apiKeyGateSubmit?.addEventListener('click', handleGateSubmit);
     
@@ -179,13 +306,23 @@ function setupEventListeners() {
     // Sidebar API Key Input Change
     apiKeyInput?.addEventListener('input', (e) => {
         const val = e.target.value.trim();
-        apiKey = val;
-        if (val) {
-            localStorage.setItem('gemini_api_key', val);
-            updateStatusUI(true);
-        } else {
-            localStorage.removeItem('gemini_api_key');
+        if (!val) {
+            apiKey = '';
+            if (currentUser) {
+                localStorage.removeItem('api_key_' + currentUser);
+            }
+            if (apiKeyGate) {
+                apiKeyGate.style.display = 'flex';
+                apiKeyGate.setAttribute('aria-hidden', 'false');
+            }
             updateStatusUI(false);
+            showToast('Peringatan', 'API Key dihapus. Harap isi kembali untuk mengobrol.', 'warning');
+        } else {
+            apiKey = val;
+            if (currentUser) {
+                localStorage.setItem('api_key_' + currentUser, val);
+            }
+            updateStatusUI(true);
         }
     });
 
@@ -247,18 +384,14 @@ function setupEventListeners() {
 function handleGateSubmit() {
     const val = apiKeyGateInput.value.trim();
     if (!val) {
-        // Go in Demo Mode
-        showToast('Info', 'Berjalan dalam Demo Mode (Simulasi).', 'info');
-        if (apiKeyGate) {
-            apiKeyGate.style.display = 'none';
-            apiKeyGate.setAttribute('aria-hidden', 'true');
-        }
-        updateStatusUI(false);
+        showToast('Error', 'API Key Gemini wajib diisi untuk membuka akses!', 'error');
         return;
     }
 
     apiKey = val;
-    localStorage.setItem('gemini_api_key', val);
+    if (currentUser) {
+        localStorage.setItem('api_key_' + currentUser, val);
+    }
     if (apiKeyInput) apiKeyInput.value = val;
     
     if (apiKeyGate) {
@@ -273,10 +406,10 @@ function handleGateSubmit() {
 function updateStatusUI(isConnected) {
     if (isConnected) {
         if (apiStatusDot) apiStatusDot.className = 'status-indicator status-connected';
-        if (apiStatusText) apiStatusText.textContent = 'API Mode (Terhubung)';
+        if (apiStatusText) apiStatusText.textContent = apiKey.toLowerCase() === 'demo' ? 'Demo Mode (Simulasi)' : 'API Mode (Terhubung)';
     } else {
         if (apiStatusDot) apiStatusDot.className = 'status-indicator status-demo';
-        if (apiStatusText) apiStatusText.textContent = 'Demo Mode (Simulasi)';
+        if (apiStatusText) apiStatusText.textContent = 'API Key Kosong';
     }
 }
 
@@ -443,7 +576,7 @@ async function handleSendMessage() {
         abortController = new AbortController();
         let responseText = '';
 
-        if (!apiKey) {
+        if (apiKey.toLowerCase() === 'demo') {
             // Simulated response in Demo Mode
             const possibleResponses = MOCK_RESPONSES[activePresetId] || MOCK_RESPONSES.general;
             const fullResponse = possibleResponses[Math.floor(Math.random() * possibleResponses.length)];
@@ -704,6 +837,25 @@ function handleClearChat() {
     if (latencyText) latencyText.textContent = 'Latensi: N/A';
 
     showToast('Sukses', 'Riwayat obrolan dibersihkan.', 'success');
+}
+
+// Clear Chat Silently on Logout
+function handleClearChatSilently() {
+    conversationHistory = [];
+    const messages = chatMessages.querySelectorAll('.message');
+    messages.forEach(msg => msg.remove());
+
+    if (chatInput) {
+        chatInput.value = '';
+        chatInput.style.height = 'auto';
+    }
+    if (charCounter) charCounter.textContent = '0/2000';
+    if (sendBtn) sendBtn.disabled = true;
+    if (regenerateBtn) regenerateBtn.disabled = true;
+
+    toggleWelcomeScreen();
+    updateWordCount();
+    if (latencyText) latencyText.textContent = 'Latensi: N/A';
 }
 
 // Export Chat to TXT

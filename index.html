@@ -20,6 +20,54 @@
         <div class="glow-orb orb-3"></div>
     </div>
 
+    <!-- Auth Gate (Login/Register Overlay) -->
+    <div class="auth-gate" id="auth-gate" style="display: flex;">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h2>Selamat Datang</h2>
+                <p>Silakan masuk atau buat akun baru untuk memulai.</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab-btn active" id="tab-login-btn">Login</button>
+                <button class="auth-tab-btn" id="tab-register-btn">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <form class="auth-form" id="login-form" onsubmit="event.preventDefault();">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" placeholder="Masukkan username Anda..." required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Masukkan password Anda..." required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full" id="login-submit-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> Masuk Sesi
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form class="auth-form" id="register-form" style="display: none;" onsubmit="event.preventDefault();">
+                <div class="form-group">
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" placeholder="Pilih username unik..." required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" placeholder="Buat password aman..." required autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full" id="register-submit-btn">
+                    <i class="fa-solid fa-user-plus"></i> Daftar Akun
+                </button>
+            </form>
+        </div>
+    </div>
+
     <div class="app-container">
         <!-- Sidebar Panel: Configurations & Presets -->
         <aside class="sidebar" id="sidebar">
@@ -59,7 +107,7 @@
                                 <i class="fa-solid fa-eye"></i>
                             </button>
                         </div>
-                        <span class="input-hint">Kunci disimpan aman di browser Anda. Belum punya? Aplikasi akan berjalan dalam <strong>Demo Mode</strong>.</span>
+                        <span class="input-hint">Kunci disimpan aman di browser Anda. Hubungkan API Key Anda untuk mulai mengobrol.</span>
                     </div>
 
                     <div class="form-group">
@@ -148,6 +196,10 @@
             
             <!-- Sidebar Footer -->
             <div class="sidebar-footer">
+                <button class="btn btn-outline btn-full logout-btn" id="logout-btn" title="Keluar dari Akun" style="margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Keluar Akun</span>
+                </button>
                 <button class="theme-toggle-btn" id="theme-toggle-btn" title="Ganti Tema (Gelap/Terang)">
                     <i class="fa-solid fa-moon theme-icon"></i>
                     <span id="theme-text">Mode Gelap</span>
