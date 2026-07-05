@@ -1,0 +1,17 @@
+{
+  "name": "ai-assistant-studio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI Assistant Studio (Gemini) - static vanilla JS",
+  "main": "app.js",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
+

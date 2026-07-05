@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant Studio - Chatbot Pintar & Kustomisasi Parameter</title>
+    <!-- Google Fonts: Plus Jakarta Sans for Premium Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Font Awesome for sleek modern icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+    <div class="app-background">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Panel: Configurations & Presets -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-logo">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <h1>AI Studio</h1>
+                        <span class="sub-brand">Chatbot Assistant v1.0</span>
+                    </div>
+                </div>
+                <button class="close-sidebar-btn" id="close-sidebar-btn" aria-label="Tutup sidebar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-content">
+                <!-- Section 1: Use Case Presets -->
+                <section class="config-section">
+                    <h2 class="section-title"><i class="fa-solid fa-cubes"></i> Pilih Templat Use Case</h2>
+                    <div class="preset-grid" id="preset-grid">
+                        <!-- Presets will be generated dynamically by JS -->
+                    </div>
+                </section>
+
+                <!-- Section 2: Model & API Key -->
+                <section class="config-section">
+                    <h2 class="section-title"><i class="fa-solid fa-sliders"></i> Konfigurasi Model</h2>
+                    
+                    <div class="form-group">
+                        <label for="api-key-input">Gemini API Key</label>
+                        <div class="api-key-wrapper">
+                            <input type="password" id="api-key-input" placeholder="Masukkan API Key Anda..." autocomplete="off">
+                            <button type="button" class="toggle-password-btn" id="toggle-api-key" aria-label="Tampilkan/Sembunyikan API Key">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                        <span class="input-hint">Kunci disimpan aman di browser Anda. Belum punya? Aplikasi akan berjalan dalam <strong>Demo Mode</strong>.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="model-select">Pilih Model AI</label>
+                        <div class="select-wrapper">
+                            <select id="model-select">
+                                <option value="gemini-2.5-flash" selected>Gemini 2.5 Flash (Cepat & Efisien)</option>
+                                <option value="gemini-2.5-pro">Gemini 2.5 Pro (Cerdas & Analitis)</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down select-icon"></i>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section 3: Advanced Parameters -->
+                <section class="config-section">
+                    <h2 class="section-title"><i class="fa-solid fa-gears"></i> Parameter Generasi</h2>
+                    
+                    <div class="form-group">
+                        <div class="slider-header">
+                            <label for="temp-slider">Temperature (Kreativitas)</label>
+                            <span class="slider-value" id="temp-val">0.7</span>
+                        </div>
+                        <input type="range" id="temp-slider" min="0.0" max="2.0" step="0.1" value="0.7">
+                        <div class="slider-labels">
+                            <span>Fokus / Konsisten</span>
+                            <span>Sangat Kreatif</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="slider-header">
+                            <label for="tokens-slider">Max Output Tokens</label>
+                            <span class="slider-value" id="tokens-val">2048</span>
+                        </div>
+                        <input type="range" id="tokens-slider" min="256" max="8192" step="256" value="2048">
+                        <div class="slider-labels">
+                            <span>Pendek</span>
+                            <span>Sangat Panjang</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="slider-header">
+                            <label for="topp-slider">Top-P (Nucleus Sampling)</label>
+                            <span class="slider-value" id="topp-val">0.95</span>
+                        </div>
+                        <input type="range" id="topp-slider" min="0.0" max="1.0" step="0.05" value="0.95">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="system-instruction">System Instruction (Instruksi Peran)</label>
+                        <textarea id="system-instruction" rows="4" placeholder="Tuliskan instruksi peran AI di sini..."></textarea>
+                        <span class="input-hint">Instruksi tersembunyi yang menentukan sifat dan batasan chatbot.</span>
+                    </div>
+                </section>
+
+                <!-- Section 4: Chat Utilities -->
+                <section class="config-section utilities">
+                    <button class="btn btn-secondary btn-full" id="clear-chat-btn">
+                        <i class="fa-solid fa-trash-can"></i> Bersihkan Chat
+                    </button>
+                <div class="utility-buttons-row">
+                        <button class="btn btn-outline" id="export-txt-btn" title="Ekspor sebagai Teks (.txt)">
+                            <i class="fa-solid fa-file-export"></i> Ekspor TXT
+                        </button>
+                        <button class="btn btn-outline" id="export-json-btn" title="Ekspor sebagai JSON (.json)">
+                            <i class="fa-solid fa-code"></i> Ekspor JSON
+                        </button>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 6px;">
+                        <div class="slider-header">
+                            <label for="context-window-select">Context Window (pesan terakhir)</label>
+                            <span class="slider-value" id="context-window-val">10</span>
+                        </div>
+                        <select id="context-window-select">
+                            <option value="5">5 pesan</option>
+                            <option value="10" selected>10 pesan</option>
+                            <option value="20">20 pesan</option>
+                            <option value="50">50 pesan</option>
+                        </select>
+                    </div>
+                </section>
+            </div>
+            
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer">
+                <button class="theme-toggle-btn" id="theme-toggle-btn" title="Ganti Tema (Gelap/Terang)">
+                    <i class="fa-solid fa-moon theme-icon"></i>
+                    <span id="theme-text">Mode Gelap</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-container">
+            <!-- Chat Header -->
+            <header class="chat-header">
+                <div class="chat-header-info">
+                    <button class="open-sidebar-btn" id="open-sidebar-btn" aria-label="Buka konfigurasi">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="active-preset-badge" id="header-preset-badge">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h2 id="header-preset-title">Asisten Umum</h2>
+                        <div class="header-status-row">
+                            <span class="status-indicator status-demo" id="api-status-dot"></span>
+                            <span class="status-text" id="api-status-text">Demo Mode (Simulasi)</span>
+                            <span class="status-separator">•</span>
+                            <span class="latency-text" id="latency-text">Latensi: N/A</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-header-actions">
+                    <div class="stats-badge" id="stats-badge" title="Jumlah total kata dalam sesi ini">
+                        <i class="fa-solid fa-align-left"></i>
+                        <span id="word-count-stat">0 Kata</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Chat Message Area -->
+            <div class="chat-messages-wrapper" id="chat-messages-wrapper">
+                <div class="chat-messages" id="chat-messages">
+                    <!-- API Key Gate (overlay) -->
+                    <div class="api-key-gate" id="api-key-gate" aria-hidden="false">
+                        <div class="api-key-gate-card">
+                            <div class="api-key-gate-bubbles">
+                                <div class="message message-ai api-key-gate-bubble">
+                                    <div class="message-avatar"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                                    <div class="message-body-wrapper">
+                                        <div class="message-bubble">
+                                            <p><strong>Sebelum mulai…</strong></p>
+                                            <p>Masukkan <strong>Gemini API Key</strong> agar akses ke AI bisa dibuka.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="api-key-gate-form">
+                                <label for="api-key-gate-input">Gemini API Key</label>
+                                <div class="api-key-wrapper">
+                                    <input type="password" id="api-key-gate-input" placeholder="Masukkan API Key Anda..." autocomplete="off" />
+                                </div>
+                                <div class="api-key-gate-actions">
+                                    <button type="button" class="btn btn-primary btn-full" id="api-key-gate-submit">
+                                        <i class="fa-solid fa-unlock"></i> Masuk
+                                    </button>
+                                </div>
+                                <div class="input-hint" style="margin-top: 10px;">
+                                    Kunci akan disimpan <strong>di browser</strong> (localStorage) agar otomatis terisi saat buka lagi.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Welcome screen before messages -->
+                    <div class="welcome-screen" id="welcome-screen">
+                        <div class="welcome-icon">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </div>
+                        <h3>Selamat Datang di AI Assistant Studio</h3>
+                        <p class="welcome-desc">Asisten AI interaktif dengan konfigurasi parameter penuh. Pilih usecase di sidebar kiri atau langsung mulai dengan salah satu topik berikut:</p>
+                        
+                        <div class="starter-prompts-grid" id="starter-prompts-grid">
+                            <!-- Prompts will be generated dynamically by JS based on current Use Case -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Input Area -->
+            <footer class="chat-input-area" id="chat-input-area">
+                <div class="chat-input-container">
+                    <div class="input-actions-left">
+                        <button class="input-action-btn" id="reset-conversation-btn" title="Mulai Percakapan Baru">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                    </div>
+                    
+                    <textarea class="chat-input-field" id="chat-input" rows="1" placeholder="Ketik pesan di sini..." max-rows="5"></textarea>
+                    
+                    <div class="input-actions-right">
+                        <button class="input-action-btn input-action-btn-stop" id="stop-btn" title="Stop Generation" aria-label="Stop generation" disabled>
+                            <i class="fa-solid fa-stop"></i>
+                        </button>
+                        <button class="input-action-btn input-action-btn-regenerate" id="regenerate-btn" title="Regenerate Jawaban Terakhir" aria-label="Regenerate last answer" disabled>
+                            <i class="fa-solid fa-rotate"></i>
+                        </button>
+                        <div class="char-counter" id="char-counter">0/2000</div>
+                        <button class="send-btn" id="send-btn" disabled aria-label="Kirim pesan">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="footer-note">
+                    Ditenagai oleh Google Gemini API. Sesuaikan parameter di panel kiri untuk mengubah respons.
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Alert / Toast Notification -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Custom Script -->
+    <script src="app.js"></script>
+    <script>
+        // Auto-submit gate on Enter for better UX
+        (function () {
+            var input = document.getElementById('api-key-gate-input');
+            var btn = document.getElementById('api-key-gate-submit');
+            if (!input || !btn) return;
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    btn.click();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
